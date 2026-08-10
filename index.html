@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Guardian · Карты и танки</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #0a0610;
+      --accent: #e31b23;
+      --line: #2a2035;
+      --text: #f3f0f7;
+      --muted: #9b90a8;
+      --safe-t: var(--tg-safe-area-inset-top, env(safe-area-inset-top, 0px));
+      --safe-b: var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      overflow: hidden;
+    }
+    .app {
+      height: 100%;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      padding-top: var(--safe-t);
+      padding-bottom: var(--safe-b);
+    }
+    .tabs {
+      flex: 0 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 8px 10px;
+      background: #140c1c;
+      border-bottom: 1px solid var(--line);
+      z-index: 5;
+    }
+    .tabs button {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #1a121f;
+      color: var(--muted);
+      font-family: Impact, Oswald, sans-serif;
+      font-style: italic;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      font-size: 14px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .tabs button.is-on {
+      color: #fff;
+      background: var(--accent);
+      border-color: #ff4a52;
+      box-shadow: 0 0 18px rgba(227, 27, 35, .35);
+    }
+    .stage {
+      flex: 1 1 auto;
+      position: relative;
+      min-height: 0;
+      background: var(--bg);
+    }
+    .stage iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: var(--bg);
+      display: none;
+    }
+    .stage iframe.is-on { display: block; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <nav class="tabs" role="tablist">
+      <button type="button" class="is-on" data-tab="maps" role="tab" aria-selected="true">1. Карты</button>
+      <button type="button" data-tab="tanks" role="tab" aria-selected="false">2. Танки</button>
+    </nav>
+    <div class="stage">
+      <iframe class="is-on" id="maps" title="Карты" src="maps.html"></iframe>
+      <iframe id="tanks" title="Танки" src="tanks.html"></iframe>
+    </div>
+  </div>
+  <script>
+    if (window.Telegram && Telegram.WebApp) {
+      const tg = Telegram.WebApp;
+      tg.ready();
+      tg.expand();
+      try { tg.disableVerticalSwipes && tg.disableVerticalSwipes(); } catch (e) {}
+      try { tg.setHeaderColor("#140c1c"); tg.setBackgroundColor("#0a0610"); } catch (e) {}
+    }
+    const buttons = [...document.querySelectorAll(".tabs button")];
+    const frames = {
+      maps: document.getElementById("maps"),
+      tanks: document.getElementById("tanks"),
+    };
+    function openTab(name) {
+      buttons.forEach((b) => {
+        const on = b.dataset.tab === name;
+        b.classList.toggle("is-on", on);
+        b.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      Object.entries(frames).forEach(([k, el]) => el.classList.toggle("is-on", k === name));
+      try { history.replaceState(null, "", "#" + name); } catch (e) {}
+    }
+    buttons.forEach((b) => b.addEventListener("click", () => openTab(b.dataset.tab)));
+    const hash = (location.hash || "#maps").replace("#", "");
+    openTab(hash === "tanks" ? "tanks" : "maps");
+  </script>
+</body>
+</html>
